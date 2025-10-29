@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+ :root{
+      --gray: #bdbdbd;
+      --green: #28a745;
+      --red: #d9534f;
+      --button-blue: #0d6efd;
+      --card-bg: #ffffff;
+      --page-bg: #efefef;
+    }
+    *{box-sizing:border-box}
+    html{
+        font-family:'Courier New', Courier, monospace;
+    }
+    body{
+      margin:0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--page-bg);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      padding:20px;
+     background-image: url(background.jpg);
+     overflow: hidden;
+    }
+    .signup-form {
+    width: 360px;
+    border: 2px solid #ccc; /* visible border */
+    background-color: rgba(255, 255, 255, 0.9); /* semi-transparent white background */
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    margin:0 auto;
+    }
+    .card{
+      width:360px;
+      background:var(--card-bg);
+      border-radius:8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      padding:26px;
+      border:1px solid rgba(0,0,0,0.06);
+    }
+
+    h2{
+      text-align:center;
+      margin:0 0 18px 0;
+      font-size:22px;
+      font-weight:700;
+    }
+
+    label {
+  display: block;
+  margin: 0px 9px 3px 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 6px;
+  border: 2.2px solid var(--gray);
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  font-size: 15px;  /* ← slightly larger text */
+  background: #fff;
+}
+
+
+    /* editing state - we will set inline style gray on input event; CSS classes for final states: */
+    input.state-success{
+      border-color: var(--green) !important;
+      box-shadow: 0 0 0 4px rgba(40,167,69,0.06);
+    }
+    input.state-error{
+      border-color: var(--red) !important;
+      box-shadow: 0 0 0 4px rgba(217,83,79,0.06);
+    }
+
+    .error-message{
+      color: var(--red);
+      font-size:12px;
+      margin:6px 0 0 0;
+      min-height:16px; /* reserve space so layout doesn't jump */
+    }
+
+    /* Button */
+  .button {
+  display: block;
+  width: 80%;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border: none;
+  background: var(--button-blue);
+  color: white;
+  font-weight: 600;
+  margin: 16px auto 0;
+  cursor: pointer;
+  font-size: 15px;
+  transition: filter 0.2s ease;
+}
+
+.button:hover {
+  filter: brightness(1.2);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+
+    /* small helper text style */
+    .hint{
+      color:#777;
+      font-size:12px;
+      margin-top:6px;
+      line-height:1.2;
+    }
+
+    /* success message */
+    .success-box{
+      margin-top:12px;
+      padding:10px;
+      background: #e6f4ea;
+      border:1px solid rgba(40,167,69,0.15);
+      color: #155724;
+      border-radius:4px;
+      font-size:14px;
+      display:none;
+    }

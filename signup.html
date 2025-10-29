@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Signup</title>
+</head>
+<body>
+   <div class="signup-form">
+  <h2>Signup</h2>
+  <form id="signupForm">
+    <div>
+      <label>Username:</label>
+      <input type="text" id="username-input" placeholder="Username">
+      <div class="error-message" id="username-error"></div>
+    </div>
+    <div>
+      <label>Email:</label>
+      <input type="email" id="email-input" placeholder="abc@gmail.com">
+      <div class="error-message" id="email-error"></div>
+    </div>
+    <div>
+      <label>Password:</label>
+      <input type="password" id="password-input" placeholder="Password">
+      <div class="error-message" id="password-error"></div>
+    </div>
+    <div>
+      <label>Confirm Password:</label>
+      <input type="password" id="confirm-password-input" placeholder="Confirm Password">
+      <div class="error-message" id="confirm-error"></div>
+    </div>
+    <button type="submit" class="button">Signup</button>
+  </form>
+</div>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+  function findOne(...ids) {
+    for (const id of ids) {
+      if (!id) continue;
+      const el = document.getElementById(id);
+      if (el) return el;
+    }
+    return null;
+  }
+
+  // Try common IDs used in your versions
+  const username = findOne('username-input', 'username', 'user', 'usernameInput');
+  const email = findOne('email-input', 'email', 'email-input', 'emailInput');
+  const password = findOne('password-input', 'password', 'pass', 'passwordInput');
+  const confirm = findOne('confirm-password-input', 'confirm-password', 'confirmPassword', 'confirm-password-input', 'confirm-password-input');
+
+  const form = document.querySelector('form') || document.getElementById('signupForm');
+
+  if (!form) {
+    console.error('Validation script: form not found. Make sure <form> exists.');
+    return;
+  }
+
+  // If some inputs are missing, still continue but log
+  if (!username) console.warn('username input not found (expected id username-input or username).');
+  if (!password) console.warn('password input not found (expected id password-input or password).');
+  if (!confirm) console.warn('confirm password input not found (expected id confirm-password-input).');
+
+  // utility: ensure an error-element exists directly after input
+  function ensureErrorEl(input, idSuffix) {
+    if (!input) return null;
+    // prefer an existing sibling with class error-message
+    let next = input.nextElementSibling;
+    if (next && next.classList && next.classList.contains('error-message')) return next;
+
+    // look for an element with id pattern
+    const candidateIds = [
+      (input.id ? input.id.replace(/-input$/, '-error') : null),
+      (input.id ? input.id.replace(/input$/, 'error') : null),
+      (idSuffix ? idSuffix : null)
+    ];
+    for (const cid of candidateIds) {
+      if (!cid) continue;
+      const el = document.getElementById(cid);
+      if (el && el.classList && el.classList.contains('error-message')) return el;
+    }
+
+    // otherwise create and insert after input
+    const msg = document.createElement('div');
+    msg.className = 'error-message';
+    msg.style.minHeight = '16px';
+    input.insertAdjacentElement('afterend', msg);
+    return msg;
+  }
+
+  // create error elements
+  const usernameError = ensureErrorEl(username, 'username-error');
+  const passwordError = ensureErrorEl(password, 'password-error');
+  const confirmError = ensureErrorEl(confirm, 'confirm-error');
+  const emailError = ensureErrorEl(email, 'email-error');
+
+  // regexes
+  const usernameMin = 3, usernameMax = 25;
+  const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+
+  // styling helpers (assume CSS classes exist: state-error and state-success)
+  function setEditingState(el) {
+    if (!el) return;
+    el.classList.remove('state-error','state-success');
+    el.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--gray') || '#bdbdbd';
+    // remove boxShadow if set inline
+    el.style.boxShadow = '';
+  }
+  function setSuccess(el) {
+    if (!el) return;
+    el.classList.remove('state-error');
+    el.classList.add('state-success');
+    el.style.borderColor = '';
+  }
+  function setError(el, msgEl, message) {
+    if (!el) return;
+    el.classList.remove('state-success');
+    el.classList.add('state-error');
+    if (msgEl) msgEl.textContent = message;
+  }
+
+  // on input: editing -> reset to gray and clear error message; if non-empty also show green tentatively
+  [username, email, password, confirm].forEach(input => {
+    if (!input) return;
+    input.addEventListener('input', () => {
+      // clear error text
+      const msg = (input === username ? usernameError : input === password ? passwordError : input === confirm ? confirmError : emailError);
+      if (msg) msg.textContent = '';
+      setEditingState(input);
+
+      // if value non-empty, mark green tentatively (we also validate more thoroughly on blur/submit)
+      if (input.value && input.value.trim() !== '') {
+        // for some fields we validate quick rules
+        if (input === username) {
+          if (input.value.trim().length >= usernameMin && input.value.trim().length <= usernameMax) setSuccess(input);
+          else setEditingState(input);
+        } else if (input === email) {
+          if (emailRegex.test(input.value.trim())) setSuccess(input);
+          else setEditingState(input);
+        } else if (input === password) {
+          if (passRegex.test(input.value)) setSuccess(input);
+          else setEditingState(input);
+        } else if (input === confirm) {
+          if (password && input.value === password.value && input.value !== '') setSuccess(input);
+          else setEditingState(input);
+        }
+      }
+    });
+
+    // on blur: if non-empty and valid -> green; else stay gray (validation messages shown on submit)
+    input.addEventListener('blur', () => {
+      if (!input.value || input.value.trim() === '') {
+        setEditingState(input);
+        return;
+      }
+      if (input === username) {
+        const v = input.value.trim();
+        if (v.length >= usernameMin && v.length <= usernameMax) setSuccess(input);
+        else setEditingState(input);
+      } else if (input === email) {
+        if (emailRegex.test(input.value.trim())) setSuccess(input);
+        else setEditingState(input);
+      } else if (input === password) {
+        if (passRegex.test(input.value)) setSuccess(input);
+        else setEditingState(input);
+      } else if (input === confirm) {
+        if (password && input.value === password.value && input.value !== '') setSuccess(input);
+        else setEditingState(input);
+      }
+    });
+  });
+
+  // submit handler
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+
+    // clear previous messages
+    if (usernameError) usernameError.textContent = '';
+    if (passwordError) passwordError.textContent = '';
+    if (confirmError) confirmError.textContent = '';
+    if (emailError) emailError.textContent = '';
+
+    let valid = true;
+
+    // username validation (only if non-empty, because you said fields should not be required,
+    // but you want notes to appear — We'll show notes only if user entered something OR on submit we check and show)
+    if (username) {
+      const val = username.value.trim();
+      if (val === '') {
+        // user left it empty — we DO NOT mark error by requirement (but you said notes could appear,
+        // if you want notes to always appear on empty, change this to show error)
+        // For now, we will NOT show error for empty field, but will keep border gray
+        setEditingState(username);
+      } else if (val.length < usernameMin || val.length > usernameMax) {
+        setError(username, usernameError, `Username must be between ${usernameMin} and ${usernameMax} characters.`);
+        valid = false;
+      } else {
+        setSuccess(username);
+      }
+    }
+
+    // password validation
+    if (password) {
+      const pv = password.value;
+      if (pv === '') {
+        // empty password => no error (by your requirement). leave gray
+        setEditingState(password);
+      } else if (!passRegex.test(pv)) {
+        setError(password, passwordError, 'Password must be at least 8 chars, include 1 uppercase, 1 lowercase, 1 number and 1 special char (!@#$%^&*).');
+        valid = false;
+      } else {
+        setSuccess(password);
+      }
+    }
+
+    // confirm matches password (only if confirm filled or password filled and you want to enforce)
+    if (confirm) {
+      const cv = confirm.value;
+      if (cv === '') {
+        setEditingState(confirm);
+      } else if (password && cv !== password.value) {
+        setError(confirm, confirmError, 'Passwords do not match.');
+        valid = false;
+      } else {
+        setSuccess(confirm);
+      }
+    }
+
+    // optional: email quick validation (if present)
+    if (email) {
+      const ev = email.value.trim();
+      if (ev === '') {
+        setEditingState(email);
+      } else if (!emailRegex.test(ev)) {
+        setError(email, emailError, 'Please enter a valid email address.');
+        valid = false;
+      } else {
+        setSuccess(email);
+      }
+    }
+
+    if (valid) {
+      // success action (no server) - show simple message and reset after short delay
+      // you can replace this with saving or redirecting
+      alert('Form looks valid (demo).');
+      // optionally reset fields and styles
+      form.reset();
+      [username, email, password, confirm].forEach(i => { if(i) setEditingState(i); });
+    } else {
+      // focus the first field that has .state-error
+      const firstInvalid = document.querySelector('.state-error');
+      if (firstInvalid) firstInvalid.focus();
+    }
+  });
+});
+</script>
+
+</body>
+</html>
